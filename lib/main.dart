@@ -2,6 +2,7 @@ import 'package:dokita_application/screens/chat_screen.dart';
 import 'package:dokita_application/screens/login_screen.dart';
 import 'package:dokita_application/screens/registration_screen.dart';
 import 'package:dokita_application/screens/welcome_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -11,6 +12,8 @@ void main() {
 class FlashChat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    Firebase
+        .initializeApp(); //Use this line to handle "No Firebase App '[DEFAULT]' has been created - call Firebase.initializeApp()" error
     return MaterialApp(
       title: 'Flash Chat',
       // theme: ThemeData.dark().copyWith(
