@@ -55,9 +55,8 @@ class _ChatScreenState extends State<ChatScreen> {
           IconButton(
               icon: Icon(Icons.close),
               onPressed: () {
-                messagesStream();
-                // _auth.signOut();
-                // Navigator.pop(context);
+                _auth.signOut();
+                Navigator.pop(context);
               }),
         ],
         title: Text('⚡️Chat'),
@@ -155,7 +154,7 @@ class MessageBubble extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
               child: Text(
-                '$text from $sender',
+                text,
                 style: TextStyle(color: Colors.white, fontSize: 15.0),
               ),
             ),
