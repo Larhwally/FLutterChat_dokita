@@ -4,6 +4,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+final _firestore = FirebaseFirestore.instance;
+
 class ChatScreen extends StatefulWidget {
   static const String id = 'chat_screen';
   @override
@@ -11,7 +13,7 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final _firestore = FirebaseFirestore.instance;
+  final messageTextController = TextEditingController();
   final _auth = FirebaseAuth.instance;
   late User loggedInUser;
   late String messageText;
@@ -67,35 +69,7 @@ class _ChatScreenState extends State<ChatScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            StreamBuilder<QuerySnapshot>(
-              stream: _firestore.collection('messages').snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      backgroundColor: Colors.blueAccent,
-                    ),
-                  );
-                }
-                final messages = snapshot.data!.docs;
-                List<MessageBubble> messageBubbles = [];
-                for (var message in messages) {
-                  final messageText = message.get('text');
-                  final messageSender = message.get('sender');
-
-                  final messageBubble =
-                      MessageBubble(text: messageText, sender: messageSender);
-                  messageBubbles.add(messageBubble);
-                }
-                return Expanded(
-                  child: ListView(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
-                    children: messageBubbles,
-                  ),
-                );
-              },
-            ),
+            MessagesStream(),
             Container(
               decoration: kMessageContainerDecoration,
               child: Row(
@@ -103,6 +77,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 children: <Widget>[
                   Expanded(
                     child: TextField(
+                      controller: messageTextController,
                       onChanged: (value) {
                         messageText = value;
                       },
@@ -111,6 +86,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   TextButton(
                       onPressed: () {
+                        messageTextController.clear();
                         _firestore.collection('messages').add({
                           'text': messageText,
                           'sender': loggedInUser.email
@@ -126,6 +102,42 @@ class _ChatScreenState extends State<ChatScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class MessagesStream extends StatelessWidget {
+  const MessagesStream({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: _firestore.collection('messages').snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Center(
+            child: CircularProgressIndicator(
+              backgroundColor: Colors.blueAccent,
+            ),
+          );
+        }
+        final messages = snapshot.data!.docs;
+        List<MessageBubble> messageBubbles = [];
+        for (var message in messages) {
+          final messageText = message.get('text');
+          final messageSender = message.get('sender');
+
+          final messageBubble =
+              MessageBubble(text: messageText, sender: messageSender);
+          messageBubbles.add(messageBubble);
+        }
+        return Expanded(
+          child: ListView(
+            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
+            children: messageBubbles,
+          ),
+        );
+      },
     );
   }
 }
